@@ -1,9 +1,12 @@
 
 import sha256 from 'crypto-js/sha256'
 import { useState } from 'react'
+import Popup from './Popup'
 
 
 const MainExplorer = () => {
+
+  const [cidModalVisible, setCidModalVisible] = useState(true)
 
   const [search, setSearch] = useState({
     address: '',
@@ -37,7 +40,7 @@ const MainExplorer = () => {
         <div className="w-full rounded-lg w-3/4">
           <div className="flex">
             <input type="text"
-              className="w-full bg-white pl-2 border border-blue-500 rounded-tl-lg rounded-bl-lg p-4"
+              className="w-full bg-white pl-2 border border-blue-500 rounded-lg p-3 mr-2"
               placeholder="Token Address"
               name="address"
               value={search.address}
@@ -45,7 +48,7 @@ const MainExplorer = () => {
             />
             <input
               type="text"
-              className="w-1/2 bg-white pl-2 border border-1 border-blue-500 p-4"
+              className="w-1/2 bg-white pl-2 border border-1 rounded-lg border-blue-500 p-3 mr-2"
               placeholder="Token ID"
               name="id" 
               value={search.id}
@@ -54,7 +57,7 @@ const MainExplorer = () => {
             <input
               type="button"
               value="Search"
-              className="bg-blue-500 p-2 rounded-tr-lg rounded-br-lg text-white font-semibold hover:bg-blue-800 transition-colors"
+              className="bg-blue-500 p-2 rounded-lg text-white font-semibold hover:bg-blue-800 transition-colors"
               onClick={onSearchClick}
             />
           </div>
@@ -62,8 +65,17 @@ const MainExplorer = () => {
       </div>
       <div className="flex w-screen items-center justify-center p-5">
         <div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
-          <div className="mt-4 mb-2 text-sm text-gray-600">
-            Total 4 datasets
+          <div className="mt-1 mb-4 sm:flex sm:items-center sm:justify-between">
+            <div className="text-sm text-gray-600">
+              Total 4 datasets
+            </div>
+            <div className="flex flex-col gap-4 sm:mt-0 sm:flex-row sm:items-center">
+              <input
+                type="button"
+                value="Add Dataset"
+                className="bg-green-500 p-2 rounded-lg text-white font-semibold hover:bg-green-800 transition-colors"
+              />
+            </div>
           </div>
           <table className="min-w-full divide-y divide-gray-200 text-sm table-fixed">
             <thead className="bg-gray-100">
@@ -71,7 +83,7 @@ const MainExplorer = () => {
                 <th
                   className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900"
                 >
-                  Table Key
+                  Collection
                 </th>
                 <th
                   className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900"
@@ -109,6 +121,7 @@ const MainExplorer = () => {
           </table>
         </div>
       </div>
+      {/* {cidModalVisible && <Popup />} */}
     </>
   )
 }

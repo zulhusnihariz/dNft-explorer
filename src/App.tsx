@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { Routes, Route } from "react-router-dom";
-import MainExplorer from './pages/MainExplorer'
+import MainExplorer from './pages/Explorer/MainExplorer'
 import NavbarLayout from './components/Layout/NavbarLayout';
 
 function App() {

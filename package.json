@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fluencelabs/fluence-network-environment": "^1.0.13",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -20,10 +21,15 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "postinstall": "copy-marine public",
+    "prestart": "npm run compile-aqua",
+    "prebuild": "npm run compile-aqua",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "compile-aqua": "aqua -i ./aqua/ -o ./src/_aqua",
+    "watch-aqua": "chokidar \"**/*.aqua\" -c \"npm run compile-aqua\""
   },
   "eslintConfig": {
     "extends": [
@@ -44,7 +50,11 @@
     ]
   },
   "devDependencies": {
+    "@fluencelabs/aqua": "^0.8.0-368",
+    "@fluencelabs/aqua-lib": "^0.6.0",
+    "@fluencelabs/fluence": "^0.27.5",
     "autoprefixer": "^10.4.13",
+    "chokidar-cli": "^3.0.0",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.4"
   }
