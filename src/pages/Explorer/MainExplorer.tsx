@@ -1,18 +1,35 @@
 
+import { Fluence } from '@fluencelabs/fluence';
 import sha256 from 'crypto-js/sha256'
-import { useState } from 'react'
-import Popup from './Popup'
+import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
+import { krasnodar } from '@fluencelabs/fluence-network-environment';
+import { get_cids_from_table, get_content_from_cid, generate_new_keypair } from '../../_aqua/fdb'
+
+interface FdbDht {
+  cid: string,
+  key: string,
+  public_key: string
+}
+
+interface KeyPair {
+  pk: string,
+  sk: string
+}
 
 const MainExplorer = () => {
   const [isAddOpen, setAddDataOpen] = useState(false);
   const [isNewOpen, setNewColOpen] = useState(false);
   const [isCIDOpen, setCIDOpen] = useState(false);
+  const [data, setData] = useState<FdbDht[]>([])
+  const [content, setContent] = useState<string>('')
+  const [selectedCid, setSelectedCid] = useState('')
+  const [keypair, setKeypair] = useState<KeyPair>()
 
   const addDataModalStyles = {
     content : {
       width: '50%',
-      height: '55%',
+      height: '75%',
       top: '50%',
       left: '50%',
       right: 'auto',
@@ -35,30 +52,27 @@ const MainExplorer = () => {
     }
   };
 
-  const jsonData = {
-  type: "front end",
-  items: [{ name: 10, url: true }]
-};
-
-  const [cidModalVisible, setCidModalVisible] = useState(true)
-
   const [search, setSearch] = useState({
     address: '',
     id: ''
   })
 
-  const onSearchClick = (e: any) => {
+  const onSearchClick = async (e: any) => {
     e.preventDefault()
+
+    if (!Fluence.getStatus().isConnected) {
+      return;
+    }
+
     const result = sha256(JSON.stringify({
-      token_address: search.address,
-      token_id: search.id,
-      chain_id: 'bnb',
+      token_address: search.address.toLowerCase(),
+      token_id: parseInt(search.id),
+      chainId: 56,
       nonce: 0
     }))
 
-    // TODO - send request to aqua
-
-    console.log(String(result))
+    const r = await get_cids_from_table(String(result))
+    setData((r[0] as any).datas as FdbDht[])
   }
 
   const onHandleChange = (event: any) => {
@@ -67,6 +81,28 @@ const MainExplorer = () => {
       [event.target.name]: event.target.value
     })
   }
+
+  const onClickCid = async (cid: string) => {
+    const content = await get_content_from_cid(cid)
+    setCIDOpen(true)
+    setSelectedCid(cid)
+    setContent(content[0].data)
+  }
+
+  const onCidOk = async () => {
+    setCIDOpen(false)
+    setContent('')
+  }
+
+  const onGenerateKey = async() => {
+    const keypair = await generate_new_keypair()
+    setKeypair(keypair as KeyPair)
+  }
+
+  useEffect(() => {
+    Fluence.start({ connectTo: krasnodar[5] })
+      .catch((err) => console.log("Client initialization failed", err));
+  }, []);
 
   return (
     <>
@@ -146,20 +182,20 @@ const MainExplorer = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              <tr>
-                <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  LOvsYSZgm5VUAgYtkcjs0w+r6OtUzJickjwppF/IoXU=
-                </td>
-                <td className="whitespace-nowrap px-4 py-2 text-gray-700">db5ab5f495de56b3a4eca9ac26139621ac426000861b9b6fd73715a8cb24962e</td>
-                <td className="whitespace-nowrap px-4 py-2 text-gray-700 cursor-pointer" onClick={() => setCIDOpen(true)}>Qmyd..</td>
-                <td className="whitespace-nowrap px-4 py-2">
-                  <strong
-                    className="rounded bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700"
-                  >
-                    Yes
-                  </strong>
-                </td>
-              </tr>
+              {data.map((d:FdbDht) => {
+                return (
+                  <tr key={d.public_key}>
+                    <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                      {d.public_key}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">{d.key}</td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700 cursor-pointer" onClick={() => onClickCid(d.cid)}>{d.cid}</td>
+                    <td className="whitespace-nowrap px-4 py-2">
+                      
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -182,13 +218,12 @@ const MainExplorer = () => {
               htmlFor="text"
               className="block text-sm font-semibold text-gray-800"
             >
-              Key :
+              Key
             </label>
             <input
               type="text"
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
               placeholder="Key..."
-              disabled
             />
           </div>
           <div className="mb-2 text-left pr-4">
@@ -196,12 +231,12 @@ const MainExplorer = () => {
               htmlFor="text"
               className="block text-sm font-semibold text-gray-800"
             >
-              Private Key :
+              Public Key
             </label>
             <input
               type="text"
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-              placeholder="Enter private key"
+              placeholder="Enter public key"
             />
           </div>
           <div className="mb-2 text-left pr-4">
@@ -209,11 +244,23 @@ const MainExplorer = () => {
               htmlFor="text"
               className="block text-sm font-semibold text-gray-800"
             >
-              Message :
+              Message
             </label>
             <textarea
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
               placeholder="Enter message ..."
+            />
+          </div>
+          <div className="mb-2 text-left pr-4">
+            <label
+              htmlFor="text"
+              className="block text-sm font-semibold text-gray-800"
+            >
+              Signature
+            </label>
+            <textarea
+              className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+              placeholder="Signature"
             />
           </div>
           <div className="mt-8 flex justify-center ">
@@ -245,12 +292,12 @@ const MainExplorer = () => {
               htmlFor="text"
               className="block text-sm font-semibold text-gray-800"
             >
-              Public Key :
+              Public Key
             </label>
             <input
               type="text"
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-              placeholder="Enter public key"
+              value={keypair?.pk}
             />
           </div>
           <div className="mb-2 text-left pr-4">
@@ -258,20 +305,21 @@ const MainExplorer = () => {
               htmlFor="text"
               className="block text-sm font-semibold text-gray-800"
             >
-              Secret Key :
+              Secret Key
             </label>
             <input
               type="text"
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-              placeholder="Enter secret key"
+              value={keypair?.sk}
             />
           </div>
           <div className="mt-8 flex justify-center ">
             <button
-              type="submit"
+              type="button"
               className="bg-green-500 py-2 px-4 rounded-lg text-white font-semibold hover:bg-green-800 transition-colors"
+              onClick={onGenerateKey}
             >
-              Ok
+              Generate
             </button>
           </div>
         </form>
@@ -294,17 +342,19 @@ const MainExplorer = () => {
               htmlFor="text"
               className="block text-sm font-semibold text-gray-800"
             >
-              JSON VIEW :
+              CID: {selectedCid}
             </label>
             <textarea
               className="h-36 block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
               placeholder="CID"
+              value={content}
             />
           </div>
           <div className="mt-8 flex justify-center ">
             <button
-              type="submit"
+              type="button"
               className="bg-green-500 py-2 px-4 rounded-lg text-white font-semibold hover:bg-green-800 transition-colors"
+              onClick={onCidOk}
             >
               Ok
             </button>

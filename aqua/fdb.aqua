@@ -1,0 +1,94 @@
+import "@fluencelabs/aqua-lib/builtin.aqua" 
+
+data FdbDht:
+  public_key: string
+  cid: string
+  key: string
+
+data FdbGetResult:
+  success: bool
+  error: string
+  data: string
+
+data FdbGetResults:
+  success: bool
+  error: string
+  datas: []FdbDht
+
+data FdbKeyPair:
+  pk: string
+  sk: string
+
+data FdbResult:
+  success: bool
+  err_msg: string
+
+service Fdb:
+  add(key: string, data: string, public_key: string, signature: string) -> FdbResult
+  am_i_owner() -> bool
+  generate_new_keypair() -> FdbKeyPair
+  get_cids_from_dht(key: string) -> FdbGetResults
+  get_datasets(key: string) -> []string
+  init_service() -> FdbResult
+  ipfs_dag_get(cid: string) -> FdbGetResult
+
+--peer and relay and service for zero-db-ipfs
+const PEER ?= "12D3KooWFEwNWcHqi9rtsmDhsYcDbRUCDXH84RC4FW6UfsFWaoHi"
+const SERVICE_ID ?= "730f04b3-f16e-4de3-8e52-5e00b56439a7"
+
+func add_data(key: string, data: string, public_key: string, signature: string) -> *FdbResult:
+    resultValue: *FdbResult
+
+    on PEER:
+      Fdb SERVICE_ID 
+
+      Fdb.init_service()
+      resultValue <- Fdb.add(key, data, public_key, signature)
+
+    <- resultValue
+
+func get_cids_from_table(key: string) -> *FdbGetResults:
+  results: *FdbGetResults
+
+  on PEER:
+    Fdb SERVICE_ID
+        
+    results <- Fdb.get_cids_from_dht(key)
+
+  <- results 
+
+func ipfs_dag_get(cid: string) -> *FdbGetResult:
+  results: *FdbGetResult
+
+  on PEER:
+    Fdb SERVICE_ID
+
+    results <- Fdb.ipfs_dag_get(cid)
+
+  <- results 
+
+func get_content_from_cid(cid: string) -> *FdbGetResult:
+  results: *FdbGetResult
+
+  on PEER:
+    Fdb SERVICE_ID
+
+    -- PARALLEL
+    -- if cids.execPar == true:
+    --   for cid <- cids.cid par:
+    --     results <- Fdb.ipfs_dag_get(cid)
+      
+    --   join results[cids.length]
+
+    --   par Peer.timeout(15000, "timeout")
+    results <- Fdb.ipfs_dag_get(cid)
+
+  <- results
+
+func generate_new_keypair() -> FdbKeyPair:
+
+  on PEER:
+    Fdb SERVICE_ID
+    result <- Fdb.generate_new_keypair()
+
+  <- result
