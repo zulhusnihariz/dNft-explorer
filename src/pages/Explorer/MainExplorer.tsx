@@ -1,20 +1,15 @@
-import { Fluence } from '@fluencelabs/fluence';
-import sha256 from 'crypto-js/sha256';
-import { useEffect, useState } from 'react';
+import { solidityPackedKeccak256 } from 'ethers';
+import { useState } from 'react';
 import Modal from 'react-modal';
-import { krasnodar } from '@fluencelabs/fluence-network-environment';
-import {
-	get_cids_from_table,
-	get_content_from_cid,
-	generate_new_keypair,
-} from '../../_aqua/fdb';
+import { get_content_from_cid, generate_new_keypair } from '../../_aqua/fdb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { getMetadataWithHistory, getMetadatas } from '../../services';
 
 interface FdbDht {
+	alias: string;
 	cid: string;
-	key: string;
+	data_key: string;
 	public_key: string;
 }
 
@@ -59,29 +54,34 @@ const MainExplorer = () => {
 	};
 
 	const [search, setSearch] = useState({
-		address: '',
-		tokenId: '',
+		address: String(process.env.REACT_APP_COLLABEAT_NFT),
+		tokenId: '8',
 		chainId: 56,
 	});
 
 	const onSearchClick = async (e: any) => {
 		e.preventDefault();
 
-		if (!Fluence.getStatus().isConnected) {
-			return;
+		const input = search.address.toLowerCase() + search.tokenId + 80001 + 0;
+		const dataKey = solidityPackedKeccak256(['string'], [input]).substring(2);
+
+		try {
+			const res = await getMetadatas(dataKey);
+			const metadatas = res?.result?.metadatas;
+
+			metadatas.forEach(async (metadata: FdbDht) => {
+				let rest = await getMetadataWithHistory({
+					dataKey: metadata.data_key,
+					publicKey: metadata.public_key,
+					alias: metadata.alias,
+				});
+				console.log(`history for ${metadata.alias} `, rest);
+			});
+
+			setData(metadatas as FdbDht[]);
+		} catch (e) {
+			setData([] as FdbDht[]);
 		}
-
-		const result = sha256(
-			JSON.stringify({
-				token_address: search.address.toLowerCase(),
-				token_id: parseInt(search.tokenId),
-				chainId: 56,
-				nonce: 0,
-			})
-		);
-
-		const r = await get_cids_from_table(String(result));
-		setData((r[0] as any).datas as FdbDht[]);
 	};
 
 	const onHandleChange = (event: any) => {
@@ -107,12 +107,6 @@ const MainExplorer = () => {
 		const keypair = await generate_new_keypair();
 		setKeypair(keypair as KeyPair);
 	};
-
-	useEffect(() => {
-		Fluence.start({ connectTo: krasnodar[5] }).catch((err) =>
-			console.log('Client initialization failed', err)
-		);
-	}, []);
 
 	return (
 		<>
@@ -196,12 +190,12 @@ const MainExplorer = () => {
 						<tbody className="divide-y divide-gray-200">
 							{data.map((d: FdbDht) => {
 								return (
-									<tr key={d.public_key}>
+									<tr key={d.data_key}>
 										<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
 											{d.public_key}
 										</td>
 										<td className="whitespace-nowrap px-4 py-2 text-gray-700">
-											{d.key}
+											{d.data_key}
 										</td>
 										<td
 											className="whitespace-nowrap px-4 py-2 text-gray-700 cursor-pointer"
