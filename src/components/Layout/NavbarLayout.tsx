@@ -1,14 +1,13 @@
-import { useOutlet } from "react-router-dom"
-import Navbar from "../Navbar"
+import { useOutlet } from 'react-router-dom';
+import Navbar from '../Navbar';
 
-const NavbarLayout = () => {
+export const NavbarLayout = () => {
+	const outlet = useOutlet();
 
-  const outlet = useOutlet()
-
-  return (<>
-    <Navbar />
-    {outlet}
-  </>)
-}
-
-export default NavbarLayout
+	return (
+		<>
+			<Navbar />
+			{outlet}
+		</>
+	);
+};

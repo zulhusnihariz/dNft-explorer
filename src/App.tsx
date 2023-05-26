@@ -1,12 +1,14 @@
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import MainExplorer from './pages/Explorer/MainExplorer';
-import NavbarLayout from './components/Layout/NavbarLayout';
+import { TSParticles, NavbarLayout } from './components';
 
 function App() {
 	return (
 		<div className="App">
 			<div className="w-full h-screen flex flex-col justify-start ">
+				<TSParticles />
+
 				<Routes>
 					<Route path="/" element={<NavbarLayout />}>
 						<Route index element={<MainExplorer />} />
