@@ -1,20 +1,31 @@
-
+import { useEffect } from 'react';
+import logo from '../assets/lineagelogo.png';
 const Navbar = () => {
-  return (
-    <header aria-label="SEED Header">
-      <div className="mx-auto max-w-screen-xl overflow-y-hidden px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="md:flex md:items-center md:gap-12">
-            <a className="block text-teal-600" href="/">
-              <span className="sr-only">Home</span>
-              Lineage Explorer
-              {/* <img src={logo} alt="" className="w-[100px] h-[32px]" /> */}
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
-  )
-}
+	// get the sticky element
+	useEffect(() => {
+		const stickyElm = document.querySelector('header');
 
-export default Navbar
+		const observer = new IntersectionObserver(
+			([e]) => e.target.classList.toggle('isSticky', e.intersectionRatio < 1),
+			{ threshold: [1] }
+		);
+
+		observer.observe(stickyElm as HTMLElement);
+	});
+
+	return (
+		<header aria-label="SEED Header pt-2">
+			<div className=" mx-auto max-w-screen-xl flex h-20 items-center justify-between">
+				<a className="block " href="/">
+					<img src={logo} alt="" width={350} height={41} className="" />
+				</a>
+				<div className="flex gap-4 font-semibold text-sm ">
+					<h4 className="cursor-pointer">HOME</h4>
+					<h4 className="cursor-pointer">MIGRATE TO LINEAGE</h4>
+				</div>
+			</div>
+		</header>
+	);
+};
+
+export default Navbar;

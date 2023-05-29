@@ -3,15 +3,73 @@
 @tailwind utilities;
 
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	margin: 0;
+	font-family: Raleway, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow-x: hidden;
+	height: auto;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+	font-family: Raleway, sans-serif;
+}
+
+#tsparticles {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	max-height: 360px;
+	z-index: 0;
+
+	background-image: url('');
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: 50% 50%;
+
+	background: rgb(87, 101, 159);
+	background: -moz-linear-gradient(
+		90deg,
+		rgba(87, 101, 159, 1) 0%,
+		rgba(119, 134, 235, 1) 85%
+	);
+	background: -webkit-linear-gradient(
+		90deg,
+		rgba(87, 101, 159, 1) 0%,
+		rgba(119, 134, 235, 1) 85%
+	);
+	background: linear-gradient(
+		90deg,
+		rgba(87, 101, 159, 1) 0%,
+		rgba(119, 134, 235, 1) 85%
+	);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#57659f",endColorstr="#7786eb",GradientType=1);
+}
+
+canvas {
+	max-height: 360px;
+}
+
+input {
+	outline: none;
+}
+
+header {
+	position: sticky;
+	top: -1px; /* ➜ the trick */
+
+	padding: 1em;
+	padding-top: calc(1em + 1px); /* ➜ compensate for the trick */
+
+	transition: 0.1s;
+	z-index: 50;
+	color: white;
+}
+
+/* styles for when the header is in sticky mode */
+header.isSticky {
+	background-color: white;
+	color: #3b566e;
+	padding-top: 0;
+	padding-bottom: 0;
 }
