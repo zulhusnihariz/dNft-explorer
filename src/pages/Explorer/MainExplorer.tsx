@@ -111,10 +111,10 @@ const MainExplorer = () => {
 	return (
 		<>
 			<section className="z-2">
-				<h1 className="text-4xl text-white mt-10 mb-20 font-normal tracking-wide">
-					Lineage Explorer
-				</h1>
-				<div className="flex w-screen items-center justify-center p-5 ">
+				<div className="flex w-screen items-center justify-center p-5">
+					<h1 className="z-50 text-4xl text-white mt-10 mb-20 font-normal tracking-wide">
+						Lineage Explorer
+					</h1>
 					<div className="absolute flex w-full rounded w-3/4 bg-white p-10 shadow-md items-center top-72">
 						<input
 							type="text"
@@ -153,21 +153,8 @@ const MainExplorer = () => {
 			<section className="flex w-screen items-center justify-center p-5 pt-48">
 				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
 					<div className="mt-1 mb-4 sm:flex sm:items-center sm:justify-between">
-						<div className="text-sm text-gray-600">Total 4 datasets</div>
-						<div className="flex flex-col gap-4 sm:mt-0 sm:flex-row sm:items-center">
-							{/* --------------- ADD DATABASE MODAL ------------  */}
-							<input
-								type="button"
-								value="Add Dataset"
-								onClick={() => setAddDataOpen(true)}
-								className="bg-green-500 p-2 rounded-lg text-white font-semibold hover:bg-green-800 transition-colors"
-							/>
-							<input
-								type="button"
-								value="New Collection"
-								onClick={() => setNewColOpen(true)}
-								className="bg-green-500 p-2 rounded-lg text-white font-semibold hover:bg-green-800 transition-colors"
-							/>
+						<div className="text-sm text-gray-600">
+							Total {data.length} datasets
 						</div>
 					</div>
 					<table className="min-w-full divide-y divide-gray-200 text-sm table-fixed">
