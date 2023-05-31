@@ -73,3 +73,7 @@ header.isSticky {
 	padding-top: 0;
 	padding-bottom: 0;
 }
+
+a {
+	color: #256592;
+}

@@ -4,19 +4,48 @@ import Modal from 'react-modal';
 import { get_content_from_cid, generate_new_keypair } from '../../_aqua/fdb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { getMetadataWithHistory, getMetadatas } from '../../services';
-
-interface FdbDht {
-	alias: string;
-	cid: string;
-	data_key: string;
-	public_key: string;
-}
+import { getMetadatasWithHistory } from '../../services';
+import { FdbDht, NftAttribute } from '../../types';
+import { NftAttributeTable } from '../../components';
+import { isUrl } from '../../utils/utils.functions';
 
 interface KeyPair {
 	pk: string;
 	sk: string;
 }
+
+interface HashFormat {
+	address: string;
+	tokenId: string;
+	chainId: string;
+	dataKey: string;
+}
+
+const NftLink = (props: { url: string }) => {
+	return (
+		<a href={`${props.url}`} target="_blank">
+			{props.url}
+		</a>
+	);
+};
+
+const MetadataContent = (props: { data: FdbDht }) => {
+	const { data } = props;
+	const { alias } = data;
+	const { content } = data.metadata.metadata;
+	const contentString = String(content);
+	return (
+		<>
+			{alias === 'attributes' ? (
+				<NftAttributeTable attributes={content as NftAttribute[]} />
+			) : isUrl(contentString) ? (
+				<NftLink url={contentString} />
+			) : (
+				content
+			)}
+		</>
+	);
+};
 
 const MainExplorer = () => {
 	const [isAddOpen, setAddDataOpen] = useState(false);
@@ -26,6 +55,13 @@ const MainExplorer = () => {
 	const [content, setContent] = useState<string>('');
 	const [selectedCid, setSelectedCid] = useState('');
 	const [keypair, setKeypair] = useState<KeyPair>();
+
+	const [hash, setHash] = useState<HashFormat>({
+		address: '',
+		tokenId: '',
+		chainId: '',
+		dataKey: '',
+	});
 
 	const addDataModalStyles = {
 		content: {
@@ -56,28 +92,41 @@ const MainExplorer = () => {
 	const [search, setSearch] = useState({
 		address: String(process.env.REACT_APP_COLLABEAT_NFT),
 		tokenId: '8',
-		chainId: 56,
+		chainId: 80001,
 	});
+
+	const updateURL = (hash: HashFormat) => {
+		const currentUrl = window.location.href;
+
+		const url = new URL(currentUrl);
+
+		const { address, tokenId, chainId } = hash;
+		const newPath = `${address}/${tokenId}/${chainId}`;
+		url.pathname = newPath;
+
+		const newUrl = url.href;
+		window.history.pushState({ path: newUrl }, '', newUrl);
+	};
 
 	const onSearchClick = async (e: any) => {
 		e.preventDefault();
 
-		const input = search.address.toLowerCase() + search.tokenId + 80001 + 0;
+		const input =
+			search.address.toLowerCase() + search.tokenId + search.chainId + 0;
 		const dataKey = solidityPackedKeccak256(['string'], [input]).substring(2);
 
+		let hash = {
+			address: search.address,
+			tokenId: search.tokenId,
+			chainId: String(search.chainId),
+			dataKey,
+		};
+
+		updateURL(hash);
+		setHash(hash);
+
 		try {
-			const res = await getMetadatas(dataKey);
-			const metadatas = res?.result?.metadatas;
-
-			metadatas.forEach(async (metadata: FdbDht) => {
-				let rest = await getMetadataWithHistory({
-					dataKey: metadata.data_key,
-					publicKey: metadata.public_key,
-					alias: metadata.alias,
-				});
-				console.log(`history for ${metadata.alias} `, rest);
-			});
-
+			let metadatas = await getMetadatasWithHistory(dataKey);
 			setData(metadatas as FdbDht[]);
 		} catch (e) {
 			setData([] as FdbDht[]);
@@ -152,7 +201,14 @@ const MainExplorer = () => {
 
 			<section className="flex w-screen items-center justify-center p-5 pt-48">
 				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
-					<div className="mt-1 mb-4 sm:flex sm:items-center sm:justify-between">
+					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
+						<div className="text-sm text-gray-600">
+							{data.length > 0 && (
+								<p>
+									Metadata for data key: <b>{hash.dataKey}</b>
+								</p>
+							)}
+						</div>
 						<div className="text-sm text-gray-600">
 							Total {data.length} datasets
 						</div>
@@ -161,28 +217,31 @@ const MainExplorer = () => {
 						<thead className="bg-gray-100">
 							<tr>
 								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Collection
+									Public Key
 								</th>
 								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Key
+									Alias
+								</th>
+								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+									Content
 								</th>
 								<th className="w-1/2 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
 									CID
 								</th>
-								<th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Verified
-								</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-200">
-							{data.map((d: FdbDht) => {
+							{data.map((d: FdbDht, index: number) => {
 								return (
-									<tr key={d.data_key}>
+									<tr key={index}>
 										<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
 											{d.public_key}
 										</td>
-										<td className="whitespace-nowrap px-4 py-2 text-gray-700">
-											{d.data_key}
+										<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+											{d.alias.length > 0 ? d.alias : 'beat'}
+										</td>
+										<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+											<MetadataContent data={d} />
 										</td>
 										<td
 											className="whitespace-nowrap px-4 py-2 text-gray-700 cursor-pointer"
@@ -190,7 +249,6 @@ const MainExplorer = () => {
 										>
 											{d.cid}
 										</td>
-										<td className="whitespace-nowrap px-4 py-2"></td>
 									</tr>
 								);
 							})}
