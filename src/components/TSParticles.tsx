@@ -21,6 +21,7 @@ export const TSParticles = () => {
 			init={particlesInit}
 			loaded={particlesLoaded}
 			options={{
+				fullScreen: false,
 				fps_limit: 60,
 				interactivity: {
 					detectsOn: 'canvas',

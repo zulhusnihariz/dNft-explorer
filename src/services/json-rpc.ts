@@ -45,7 +45,7 @@ export const getMetadataWithHistory = async (args: {
 export const getMetadatasWithHistory = async (dataKey: string) => {
 	try {
 		const res = await getMetadatas(dataKey);
-		let metadatas = res?.result?.metadatas;
+		let metadatas = res?.result?.metadatas as FdbDht[];
 
 		const promises = metadatas.map(async (metadata: FdbDht) => {
 			let response = await getMetadataWithHistory({
@@ -54,11 +54,17 @@ export const getMetadatasWithHistory = async (dataKey: string) => {
 				alias: metadata.alias,
 			});
 
+			const { result } = response;
+
+			if (metadata.alias.length <= 0)
+				metadata.alias = `beat_${metadata.cid.slice(-4)}`;
+
 			let metadataIncluded = {
 				...metadata,
 				metadata: {
-					...response.result,
-					metadata: JSON.parse(response.result.metadata),
+					...result,
+					metadata: JSON.parse(result.metadata),
+					history: result.history.map((el: any) => JSON.parse(el)),
 				},
 			};
 

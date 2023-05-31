@@ -12,6 +12,10 @@ function App() {
 				<Routes>
 					<Route path="/" element={<NavbarLayout />}>
 						<Route index element={<MainExplorer />} />
+						<Route
+							path="/:address/:tokenId/:chainId"
+							element={<MainExplorer />}
+						/>
 					</Route>
 				</Routes>
 			</div>

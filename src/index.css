@@ -21,6 +21,8 @@ code {
 	height: 100%;
 	max-height: 360px;
 	z-index: 0;
+	top: 0;
+	left: 0;
 
 	background-image: url('');
 	background-repeat: no-repeat;
@@ -76,4 +78,8 @@ header.isSticky {
 
 a {
 	color: #256592;
+}
+
+table {
+	border: 1px solid #cee1f8;
 }
