@@ -2,6 +2,7 @@ import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import MainExplorer from './pages/Explorer/MainExplorer';
 import { TSParticles, NavbarLayout } from './components';
+import NFTDetails from './pages/Explorer/NFTDetails';
 
 function App() {
 	return (
@@ -12,6 +13,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={<NavbarLayout />}>
 						<Route index element={<MainExplorer />} />
+						<Route path="/nft/:dataKey" element={<NFTDetails />} />
 					</Route>
 				</Routes>
 			</div>

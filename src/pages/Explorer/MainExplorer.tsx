@@ -5,13 +5,8 @@ import { get_content_from_cid, generate_new_keypair } from '../../_aqua/fdb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { getMetadataWithHistory, getMetadatas } from '../../services';
-
-interface FdbDht {
-	alias: string;
-	cid: string;
-	data_key: string;
-	public_key: string;
-}
+import { useNavigate } from 'react-router-dom';
+import { FdbDht } from '../../types';
 
 interface KeyPair {
 	pk: string;
@@ -59,6 +54,8 @@ const MainExplorer = () => {
 		chainId: 56,
 	});
 
+	const navigate = useNavigate();
+
 	const onSearchClick = async (e: any) => {
 		e.preventDefault();
 
@@ -69,19 +66,12 @@ const MainExplorer = () => {
 			const res = await getMetadatas(dataKey);
 			const metadatas = res?.result?.metadatas;
 
-			metadatas.forEach(async (metadata: FdbDht) => {
-				let rest = await getMetadataWithHistory({
-					dataKey: metadata.data_key,
-					publicKey: metadata.public_key,
-					alias: metadata.alias,
-				});
-				console.log(`history for ${metadata.alias} `, rest);
-			});
-
 			setData(metadatas as FdbDht[]);
 		} catch (e) {
 			setData([] as FdbDht[]);
 		}
+
+		// navigate(`/nft/${dataKey}`);
 	};
 
 	const onHandleChange = (event: any) => {
@@ -112,9 +102,6 @@ const MainExplorer = () => {
 		<>
 			<section className="z-2">
 				<div className="flex w-screen items-center justify-center p-5">
-					<h1 className="z-50 text-4xl text-white mt-10 mb-20 font-normal tracking-wide">
-						Lineage Explorer
-					</h1>
 					<div className="absolute flex w-full rounded w-3/4 bg-white p-10 shadow-md items-center top-72">
 						<input
 							type="text"
@@ -150,7 +137,7 @@ const MainExplorer = () => {
 				</div>
 			</section>
 
-			<section className="flex w-screen items-center justify-center p-5 pt-48">
+			<section className="flex w-screen items-center justify-center p-5 pt-56">
 				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
 					<div className="mt-1 mb-4 sm:flex sm:items-center sm:justify-between">
 						<div className="text-sm text-gray-600">
@@ -161,10 +148,13 @@ const MainExplorer = () => {
 						<thead className="bg-gray-100">
 							<tr>
 								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Collection
+									Public Key
 								</th>
 								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Key
+									Alias
+								</th>
+								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+									Data Key
 								</th>
 								<th className="w-1/2 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
 									CID
@@ -180,6 +170,9 @@ const MainExplorer = () => {
 									<tr key={d.data_key}>
 										<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
 											{d.public_key}
+										</td>
+										<td className="whitespace-nowrap px-4 py-2 text-gray-700">
+											{d.alias}
 										</td>
 										<td className="whitespace-nowrap px-4 py-2 text-gray-700">
 											{d.data_key}

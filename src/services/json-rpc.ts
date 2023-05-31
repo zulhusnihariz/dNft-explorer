@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { FdbDht, Nft } from '../types';
 
 const jsonrpc = axios.create({
 	baseURL: process.env.REACT_APP_JSON_RPC_URL,
@@ -29,7 +30,6 @@ export const getMetadataWithHistory = async (args: {
 	publicKey: string;
 	alias: string;
 }) => {
-	console.log(args);
 	const { data } = await jsonrpc({
 		method: 'post',
 		data: {
@@ -40,4 +40,45 @@ export const getMetadataWithHistory = async (args: {
 		},
 	});
 	return data as JSONRPCResponse;
+};
+
+export const getNftDetails = async (dataKey: string) => {
+	const { data } = await jsonrpc({
+		method: 'post',
+		data: {
+			jsonrpc: '2.0',
+			method: 'get_metadatas',
+			params: [dataKey],
+			id: 'string',
+		},
+	});
+
+	const metadatas = data.result.metadatas;
+
+	let nft: { [key: string]: any } = {
+		name: '',
+		description: '',
+		attributes: '',
+		external_url: '',
+		animation_url: '',
+		image: '',
+	};
+
+	const promises = metadatas.map(async (el: FdbDht) => {
+		if (!el.alias) return;
+
+		let res = await getMetadataWithHistory({
+			dataKey: el.data_key,
+			publicKey: el.public_key,
+			alias: el.alias,
+		});
+
+		const metadata = JSON.parse(res.result.metadata);
+
+		nft[el.alias] = metadata.content;
+	});
+
+	await Promise.all(promises);
+
+	return { nft, metadatas } as { nft: Nft; metadatas: FdbDht[] };
 };
