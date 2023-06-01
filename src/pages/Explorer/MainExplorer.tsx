@@ -1,22 +1,62 @@
-import { solidityPackedKeccak256 } from 'ethers';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import { get_content_from_cid, generate_new_keypair } from '../../_aqua/fdb';
+import { generate_new_keypair } from '../../_aqua/fdb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { getMetadataWithHistory, getMetadatas } from '../../services';
+import { getMetadatasWithHistory } from '../../services';
+import { FdbDht, NftAttribute } from '../../types';
+import { NftAttributeTable } from '../../components';
+import {
+	constructDataKey,
+	formatTimestamp,
+	isUrl,
+} from '../../utils/utils.functions';
 
-interface FdbDht {
-	alias: string;
-	cid: string;
-	data_key: string;
-	public_key: string;
-}
+import { useParams } from 'react-router-dom';
 
 interface KeyPair {
 	pk: string;
 	sk: string;
 }
+
+interface HashFormat {
+	address: string;
+	tokenId: string;
+	chainId: string;
+	dataKey: string;
+}
+
+const NftLink = (props: { url: string }) => {
+	return (
+		<a href={`${props.url}`} target="_blank" className="text-ellipsis">
+			{props.url}
+		</a>
+	);
+};
+
+const MetadataContent = (props: { data: FdbDht }) => {
+	const { data } = props;
+	const { alias } = data;
+	const { content } = data.metadata.metadata;
+	const contentString = String(content);
+	return (
+		<>
+			{alias === 'attributes' ? (
+				<NftAttributeTable attributes={content as NftAttribute[]} />
+			) : isUrl(contentString) ? (
+				<NftLink url={contentString} />
+			) : (
+				content
+			)}
+		</>
+	);
+};
+
+const PrettyJSON = ({ data }: { data: any }) => (
+	<div>
+		<pre>{JSON.stringify(data, null, 2)}</pre>
+	</div>
+);
 
 const MainExplorer = () => {
 	const [isAddOpen, setAddDataOpen] = useState(false);
@@ -26,6 +66,18 @@ const MainExplorer = () => {
 	const [content, setContent] = useState<string>('');
 	const [selectedCid, setSelectedCid] = useState('');
 	const [keypair, setKeypair] = useState<KeyPair>();
+
+	const [hash, setHash] = useState<HashFormat>({
+		address: '',
+		tokenId: '',
+		chainId: '',
+		dataKey: '',
+	});
+
+	const [history, setHistory] = useState<{ alias: string; data: [] }>({
+		alias: '',
+		data: [],
+	});
 
 	const addDataModalStyles = {
 		content: {
@@ -56,32 +108,47 @@ const MainExplorer = () => {
 	const [search, setSearch] = useState({
 		address: String(process.env.REACT_APP_COLLABEAT_NFT),
 		tokenId: '8',
-		chainId: 56,
+		chainId: 80001,
 	});
 
-	const onSearchClick = async (e: any) => {
-		e.preventDefault();
-
-		const input = search.address.toLowerCase() + search.tokenId + 80001 + 0;
-		const dataKey = solidityPackedKeccak256(['string'], [input]).substring(2);
+	async function fetchMetadatas(args: Omit<HashFormat, 'dataKey'>) {
+		const dataKey = constructDataKey({
+			...args,
+			nonce: String(process.env.REACT_APP_NONCE),
+		});
 
 		try {
-			const res = await getMetadatas(dataKey);
-			const metadatas = res?.result?.metadatas;
-
-			metadatas.forEach(async (metadata: FdbDht) => {
-				let rest = await getMetadataWithHistory({
-					dataKey: metadata.data_key,
-					publicKey: metadata.public_key,
-					alias: metadata.alias,
-				});
-				console.log(`history for ${metadata.alias} `, rest);
-			});
-
+			let metadatas = await getMetadatasWithHistory(dataKey);
 			setData(metadatas as FdbDht[]);
 		} catch (e) {
 			setData([] as FdbDht[]);
 		}
+
+		let hash = { ...args, dataKey };
+		setHash(hash);
+	}
+
+	const includeHashInURL = (hash: HashFormat) => {
+		const currentUrl = window.location.href;
+
+		const url = new URL(currentUrl);
+
+		const { address, tokenId, chainId } = hash;
+		const newPath = `${address}/${tokenId}/${chainId}`;
+		url.pathname = newPath;
+
+		const newUrl = url.href;
+		window.history.pushState({ path: newUrl }, '', newUrl);
+	};
+
+	const onSearchClick = async (e: any) => {
+		e.preventDefault();
+
+		await fetchMetadatas({
+			address: search.address.toLowerCase(),
+			tokenId: search.tokenId,
+			chainId: String(search.chainId),
+		});
 	};
 
 	const onHandleChange = (event: any) => {
@@ -91,11 +158,12 @@ const MainExplorer = () => {
 		});
 	};
 
-	const onClickCid = async (cid: string) => {
-		const content = await get_content_from_cid(cid);
-		setCIDOpen(true);
-		setSelectedCid(cid);
-		setContent(content[0].data);
+	const onClickCid = async (d: FdbDht) => {
+		const { alias, metadata } = d;
+		const { history } = metadata;
+
+		let data = { alias, data: history };
+		setHistory(data);
 	};
 
 	const onCidOk = async () => {
@@ -107,6 +175,24 @@ const MainExplorer = () => {
 		const keypair = await generate_new_keypair();
 		setKeypair(keypair as KeyPair);
 	};
+
+	useEffect(() => {
+		if (hash.dataKey) includeHashInURL(hash);
+	}, [hash.dataKey]);
+
+	const { address, tokenId, chainId } = useParams();
+
+	useEffect(() => {
+		const fetch = async () => {
+			const paramsExists = address && tokenId && chainId;
+
+			if (paramsExists) {
+				await fetchMetadatas({ address, tokenId, chainId });
+			}
+		};
+
+		fetch();
+	}, []);
 
 	return (
 		<>
@@ -152,50 +238,103 @@ const MainExplorer = () => {
 
 			<section className="flex w-screen items-center justify-center p-5 pt-48">
 				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
-					<div className="mt-1 mb-4 sm:flex sm:items-center sm:justify-between">
+					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
+						<div className="text-sm text-gray-600">
+							Metadata for data key: <b>{hash.dataKey}</b>
+						</div>
 						<div className="text-sm text-gray-600">
 							Total {data.length} datasets
 						</div>
 					</div>
-					<table className="min-w-full divide-y divide-gray-200 text-sm table-fixed">
-						<thead className="bg-gray-100">
-							<tr>
-								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Collection
-								</th>
-								<th className="w-1 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Key
-								</th>
-								<th className="w-1/2 whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									CID
-								</th>
-								<th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-									Verified
-								</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-gray-200">
-							{data.map((d: FdbDht) => {
-								return (
-									<tr key={d.data_key}>
-										<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-											{d.public_key}
-										</td>
-										<td className="whitespace-nowrap px-4 py-2 text-gray-700">
-											{d.data_key}
-										</td>
-										<td
-											className="whitespace-nowrap px-4 py-2 text-gray-700 cursor-pointer"
-											onClick={() => onClickCid(d.cid)}
-										>
-											{d.cid}
-										</td>
-										<td className="whitespace-nowrap px-4 py-2"></td>
-									</tr>
-								);
-							})}
-						</tbody>
-					</table>
+
+					<div className="overflow-x overflow-scroll">
+						<table className="min-w-full table-fixed text-left text-sm text-gray-900 whitespace-nowrap">
+							<thead>
+								<tr>
+									<th className="w-1  p-2 ">Public Key</th>
+									<th className="w-1 p-2 ">Alias</th>
+									<th className="w-1 p-2 ">Content</th>
+									<th className="w-1/2 p-2 ">CID</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-gray-200">
+								{data.map((d: FdbDht, index: number) => {
+									const classes =
+										index % 2 === 0 ? 'p-3.5 bg-slate-100' : 'p-3.5';
+									return (
+										<tr key={index}>
+											<td className={classes}>{d.public_key}</td>
+											<td className={classes}>{d.alias}</td>
+											<td className={` ${classes}`}>
+												<MetadataContent data={d} />
+											</td>
+											<td
+												className={`${classes} cursor-pointer text-gray-700`}
+												onClick={() => onClickCid(d)}
+											>
+												{d.cid}
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+
+			<section className="flex w-screen items-center justify-center p-5">
+				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
+					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
+						<div className="text-sm text-gray-600">
+							<p>
+								History for alias: <b>{history.alias}</b>
+							</p>
+						</div>
+						<div className="text-sm text-gray-600">
+							Total {history.data.length} history
+						</div>
+					</div>
+					<div className="overflow-x overflow-scroll">
+						<table className="min-w-full table-fixed text-left text-sm text-gray-900 whitespace-nowrap">
+							<thead>
+								<tr>
+									<th className="w-1  p-3.5 ">Transaction</th>
+									<th className="w-1  p-3.5 ">Content</th>
+									<th className="w-1  p-3.5 ">Previous</th>
+									<th className="w-1/2  p-3.5 ">Date/Time</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-gray-200">
+								{history.data.map((d: any, index: number) => {
+									const classes =
+										index % 2 === 0 ? '  p-3.5  bg-slate-100' : '  p-3.5 ';
+									return (
+										<tr key={index}>
+											<td className={`${classes}`}>
+												<PrettyJSON data={d.transaction} />
+											</td>
+											<td className={` ${classes}`}>
+												{isUrl(d.content) ? (
+													<NftLink url={d.content} />
+												) : typeof d.content === 'string' ? (
+													d.content
+												) : (
+													<PrettyJSON data={d.content} />
+												)}
+											</td>
+											<td className={classes}>
+												<PrettyJSON data={d.previous} />
+											</td>
+											<td className={`${classes}`}>
+												{formatTimestamp(d.timestamp)}
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</section>
 
