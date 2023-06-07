@@ -1,6 +1,6 @@
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
-import MainExplorer from './pages/Explorer/MainExplorer';
+import { MainExplorer, TransactionsExplorer } from './pages';
 import { TSParticles, NavbarLayout } from './components';
 
 function App() {
@@ -16,6 +16,7 @@ function App() {
 							path="/:address/:tokenId/:chainId"
 							element={<MainExplorer />}
 						/>
+						<Route path="/txs" element={<TransactionsExplorer />} />
 					</Route>
 				</Routes>
 			</div>
