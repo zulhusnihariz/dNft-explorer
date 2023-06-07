@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FdbDht } from '../types';
+import { Metadatas } from '../types';
 
 const jsonrpc = axios.create({
 	baseURL: process.env.REACT_APP_JSON_RPC_URL,
@@ -12,7 +12,7 @@ export type JSONRPCResponse = {
 	result: any;
 };
 
-export const getMetadatas = async (dataKey: string) => {
+const getMetadatas = async (dataKey: string) => {
 	const { data } = await jsonrpc({
 		method: 'post',
 		data: {
@@ -25,7 +25,7 @@ export const getMetadatas = async (dataKey: string) => {
 	return data as JSONRPCResponse;
 };
 
-export const getMetadataWithHistory = async (args: {
+const getMetadataWithHistory = async (args: {
 	dataKey: string;
 	publicKey: string;
 	alias: string;
@@ -45,9 +45,9 @@ export const getMetadataWithHistory = async (args: {
 export const getMetadatasWithHistory = async (dataKey: string) => {
 	try {
 		const res = await getMetadatas(dataKey);
-		let metadatas = res?.result?.metadatas as FdbDht[];
+		let metadatas = res?.result?.metadatas as Metadatas[];
 
-		const promises = metadatas.map(async (metadata: FdbDht) => {
+		const promises = metadatas.map(async (metadata: Metadatas) => {
 			let response = await getMetadataWithHistory({
 				dataKey: metadata.data_key,
 				publicKey: metadata.public_key,
@@ -76,4 +76,37 @@ export const getMetadatasWithHistory = async (dataKey: string) => {
 	} catch (e) {
 		return [];
 	}
+};
+
+const getNodeClock = async () => {
+	const { data } = await jsonrpc({
+		method: 'post',
+		data: {
+			jsonrpc: '2.0',
+			method: 'get_node_clock',
+			id: 'string',
+		},
+	});
+	return data as JSONRPCResponse;
+};
+
+export const getSuccessTransactions = async (args: {
+	from: number;
+	to?: number;
+}) => {
+	const response = await getNodeClock();
+	const { timestamp: currentTime } = response.result;
+
+	const { data } = await jsonrpc({
+		method: 'post',
+		data: {
+			jsonrpc: '2.0',
+			method: 'get_success_transactions',
+			params: { from: args.from, to: currentTime },
+			id: 'string',
+		},
+	});
+
+	const { result } = data;
+	return result;
 };
