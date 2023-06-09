@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { HashSlice, createHashSlice } from './slices/search.slice';
-import { MetadatasSlice, createMetadataSlice } from './slices/metadata.slice';
+import { HistorySlice, createHistorySlice } from './slices/history.slice';
 
-type BoundStoreType = HashSlice & MetadatasSlice;
+type BoundStoreType = HashSlice & HistorySlice;
 
 export const useBoundStore = create<BoundStoreType>()((...a) => ({
 	...createHashSlice(...a),
-	...createMetadataSlice(...a),
+	...createHistorySlice(...a),
 }));
