@@ -24,6 +24,8 @@
 		"dayjs": "^1.11.8",
 		"ethers": "^6.4.0",
 		"flowbite": "^1.6.2",
+		"rc-dropdown": "^4.1.0",
+		"rc-menu": "^9.9.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-modal": "^3.16.1",
