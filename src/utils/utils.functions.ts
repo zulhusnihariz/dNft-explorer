@@ -55,3 +55,13 @@ export function constructDataKey(format: {
 	const input = address.toLowerCase() + tokenId + chainId + nonce;
 	return solidityPackedKeccak256(['string'], [input]).substring(2);
 }
+
+export function updateURL(newPath: string) {
+	const currentUrl = window.location.href;
+	const url = new URL(currentUrl);
+
+	url.pathname = newPath;
+	const newUrl = url.href;
+
+	window.history.pushState({ path: newUrl }, '', newUrl);
+}
