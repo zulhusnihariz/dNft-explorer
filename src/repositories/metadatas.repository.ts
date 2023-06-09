@@ -45,7 +45,7 @@ const useGetMetadatasWithHistory = () => {
 	const { dataKey } = useBoundStore((state) => state.hash);
 
 	return useQuery({
-		queryKey: [RQ_KEY.METADATAS, dataKey],
+		queryKey: [RQ_KEY.GET_METADATAS_WITH_HISTORY, dataKey],
 		queryFn: () => getMetadatasWithHistory(dataKey),
 		enabled: Boolean(dataKey),
 	});
