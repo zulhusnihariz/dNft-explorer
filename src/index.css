@@ -2,13 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+}
+
 body {
 	margin: 0;
 	font-family: Raleway, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	overflow-x: hidden;
-	height: auto;
 }
 
 code {
@@ -66,6 +71,7 @@ header {
 	transition: 0.1s;
 	z-index: 50;
 	color: white;
+	height: 80px;
 }
 
 /* styles for when the header is in sticky mode */
