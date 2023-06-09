@@ -32,7 +32,7 @@ export interface HashFormat {
 	dataKey: string;
 }
 
-export type TransactionsType = {
+export type Transactions = {
 	method: string;
 	timestamp: number;
 	data: any;

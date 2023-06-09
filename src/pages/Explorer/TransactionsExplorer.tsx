@@ -1,31 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
-import { getSuccessTransactions } from '../../services';
 import { Badge, TanstackReactTable } from '../../components';
 import { capitalizeWords } from '../../utils/utils.functions';
 import { ColumnDef } from '@tanstack/react-table';
-import { TransactionsType } from '../../types';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { SearchBar } from '../../components/SearchBar';
+import { useRepositories } from '../../repositories';
+import { Transactions } from '../../types';
 
 dayjs.extend(relativeTime);
 
 export const TransactionsExplorer = () => {
-	const [data, setData] = useState<any[]>([]);
+	const { useGetTransactions } = useRepositories();
+	const { data: txs } = useGetTransactions();
 
-	useEffect(() => {
-		const fetch = async () => {
-			let response = await getSuccessTransactions({ from: 1672581011 });
-
-			setData(response.transactions);
-		};
-
-		fetch();
-	}, []);
-
-	const transactionsColumns = useMemo<ColumnDef<TransactionsType>[]>(
+	const transactionsColumns = useMemo<ColumnDef<Transactions>[]>(
 		() => [
 			{
 				accessorKey: 'hash',
@@ -60,12 +51,21 @@ export const TransactionsExplorer = () => {
 
 	return (
 		<>
-			<SearchBar />
-
-			<section className="flex w-screen items-center justify-center p-5 pt-48">
+			<section className="flex items-center justify-center p-5">
 				<div className="w-full  relative block border border-gray-100 p-2 shadow-sm text-left">
+					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
+						<div className="text-sm text-gray-600">
+							<p>All Transactions</p>
+						</div>
+						<div className="text-sm text-gray-600">
+							Total {txs?.length ?? 0} transactions
+						</div>
+					</div>
 					<div className="overflow-x overflow-x-scroll">
-						<TanstackReactTable data={data} columns={transactionsColumns} />
+						<TanstackReactTable
+							data={txs ?? []}
+							columns={transactionsColumns}
+						/>
 					</div>
 				</div>
 			</section>
