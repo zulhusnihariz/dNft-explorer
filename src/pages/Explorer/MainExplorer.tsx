@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { getMetadatasWithHistory } from '../../services';
-import { Metadatas, HashFormat, Metadata, NftAttribute } from '../../types';
+import { Metadatas, Metadata, NftAttribute } from '../../types';
 import {
 	NftAttributeTable,
 	PrettyJSON,
@@ -17,6 +16,7 @@ import { useParams } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { SearchBar } from '../../components/SearchBar';
 import { useBoundStore } from '../../store';
+import { useRepositories } from '../../repositories';
 
 const MetadataContent = ({ data }: { data: Metadatas }) => {
 	const { alias } = data;
@@ -36,25 +36,12 @@ const MetadataContent = ({ data }: { data: Metadatas }) => {
 };
 
 export const MainExplorer = () => {
-	const hash = useBoundStore((state) => state.hash);
-	const setHash = useBoundStore((state) => state.setHash);
-	const metadatas = useBoundStore((state) => state.metadatas);
-	const setMetadatas = useBoundStore((state) => state.setMetadatas);
-	const history = useBoundStore((state) => state.history);
-	const setHistory = useBoundStore((state) => state.setHistory);
+	const { hash, setHash, history, setHistory } = useBoundStore(
+		(state) => state
+	);
 
-	const includeHashInURL = (hash: HashFormat) => {
-		const currentUrl = window.location.href;
-
-		const url = new URL(currentUrl);
-
-		const { address, tokenId, chainId } = hash;
-		const newPath = `${address}/${tokenId}/${chainId}`;
-		url.pathname = newPath;
-
-		const newUrl = url.href;
-		window.history.pushState({ path: newUrl }, '', newUrl);
-	};
+	const { useGetMetadatasWithHistory } = useRepositories();
+	const { data: metadata, refetch } = useGetMetadatasWithHistory();
 
 	const onClickCid = async (d: Metadatas) => {
 		const { alias, metadata } = d;
@@ -62,38 +49,24 @@ export const MainExplorer = () => {
 		setHistory(alias, history);
 	};
 
-	useEffect(() => {
-		if (hash.dataKey) includeHashInURL(hash);
-	}, [hash.dataKey]);
-
 	const { address, tokenId, chainId } = useParams();
 
 	useEffect(() => {
-		const fetch = async () => {
-			const paramsExists = address && tokenId && chainId;
+		const paramsExists = address && tokenId && chainId;
 
-			if (paramsExists) {
-				const args = { address, tokenId, chainId };
+		if (paramsExists) {
+			const args = { address, tokenId, chainId };
 
-				const dataKey = constructDataKey({
-					...args,
-					nonce: String(process.env.REACT_APP_NONCE),
-				});
+			const dataKey = constructDataKey({
+				...args,
+				nonce: String(process.env.REACT_APP_NONCE),
+			});
 
-				let hash = { ...args, dataKey };
+			let hash = { ...args, dataKey };
 
-				setHash(hash);
-
-				try {
-					let metadatas = await getMetadatasWithHistory(hash.dataKey);
-					setMetadatas(metadatas as Metadatas[]);
-				} catch (e) {
-					setMetadatas([] as Metadatas[]);
-				}
-			}
-		};
-
-		fetch();
+			setHash(hash);
+			refetch();
+		}
 	}, []);
 
 	const metadataColumns = useMemo<ColumnDef<Metadatas>[]>(
@@ -188,12 +161,15 @@ export const MainExplorer = () => {
 							Metadata for data key: <b>{hash.dataKey}</b>
 						</div>
 						<div className="text-sm text-gray-600">
-							Total {metadatas.length} datasets
+							Total {metadata?.length ?? 0} datasets
 						</div>
 					</div>
 
 					<div className="overflow-x overflow-x-scroll">
-						<TanstackReactTable data={metadatas} columns={metadataColumns} />
+						<TanstackReactTable
+							data={metadata ?? []}
+							columns={metadataColumns}
+						/>
 					</div>
 				</div>
 			</section>

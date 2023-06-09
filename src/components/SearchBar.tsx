@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { Metadatas } from '../types';
-import { constructDataKey } from '../utils/utils.functions';
-import { getMetadatasWithHistory } from '../services';
+import { constructDataKey, updateURL } from '../utils/utils.functions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useBoundStore } from '../store';
+import { useRepositories } from '../repositories';
 
 export const SearchBar = () => {
-	const setHash = useBoundStore((state) => state.setHash);
-	const setMetadatas = useBoundStore((state) => state.setMetadatas);
+	const { setHash, resetHistory } = useBoundStore((state) => state);
+	const { useGetMetadatasWithHistory } = useRepositories();
+	const { refetch } = useGetMetadatasWithHistory();
 
 	const [search, setSearch] = useState({
 		address: String(process.env.REACT_APP_COLLABEAT_NFT),
@@ -31,14 +31,14 @@ export const SearchBar = () => {
 		});
 
 		let hash = { ...args, dataKey };
-		setHash(hash);
 
-		try {
-			let metadatas = await getMetadatasWithHistory(dataKey);
-			setMetadatas(metadatas as Metadatas[]);
-		} catch (e) {
-			setMetadatas([] as Metadatas[]);
-		}
+		resetHistory();
+		setHash(hash);
+		refetch();
+
+		const { address, tokenId, chainId } = hash;
+		const newPath = `${address}/${tokenId}/${chainId}`;
+		updateURL(newPath);
 	};
 
 	const onHandleChange = (event: any) => {
