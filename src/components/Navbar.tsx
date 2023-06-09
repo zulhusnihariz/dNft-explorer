@@ -45,7 +45,6 @@ const Navbar = () => {
 		if (window !== undefined) {
 			let windowHeight = window.scrollY;
 
-			console.log(windowHeight);
 			windowHeight > 80
 				? setStickyClass(
 						'!fixed inset-x-0 z-50 bg-white duration-100 text-[#243c5a]'

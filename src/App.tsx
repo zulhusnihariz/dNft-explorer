@@ -1,6 +1,10 @@
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
-import { MainExplorer, TransactionsExplorer } from './pages';
+import {
+	MainExplorer,
+	TransactionDetails,
+	TransactionsExplorer,
+} from './pages';
 import { TSParticles, NavbarLayout } from './components';
 
 function App() {
@@ -18,6 +22,7 @@ function App() {
 						element={<MainExplorer />}
 					/>
 					<Route path="/txs" element={<TransactionsExplorer />} />
+					<Route path="/tx/:hash" element={<TransactionDetails />} />
 				</Routes>
 			</div>
 		</div>

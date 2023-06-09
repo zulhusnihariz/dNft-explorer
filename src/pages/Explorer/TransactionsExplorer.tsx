@@ -6,9 +6,9 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { SearchBar } from '../../components/SearchBar';
 import { useRepositories } from '../../repositories';
 import { Transactions } from '../../types';
+import { Link } from 'react-router-dom';
 
 dayjs.extend(relativeTime);
 
@@ -21,7 +21,9 @@ export const TransactionsExplorer = () => {
 			{
 				accessorKey: 'hash',
 				header: () => <span>Tx Hash</span>,
-				cell: ({ row }) => <i>{row.getValue('hash')}</i>,
+				cell: ({ row }) => (
+					<Link to={`/tx/${row.getValue('hash')}`}>{row.getValue('hash')}</Link>
+				),
 			},
 			{
 				accessorKey: 'method',

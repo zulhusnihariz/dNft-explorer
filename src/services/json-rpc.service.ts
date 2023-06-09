@@ -92,3 +92,17 @@ export const getTransactions = async (args: {
 
 	return data as JSONRPCResponse;
 };
+
+export const getTransaction = async (hash: string) => {
+	const { data } = await jsonrpc({
+		method: 'post',
+		data: {
+			jsonrpc: '2.0',
+			method: 'get_transaction',
+			params: [hash],
+			id: 'string',
+		},
+	});
+
+	return data as JSONRPCResponse;
+};
