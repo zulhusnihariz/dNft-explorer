@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { Badge, TanstackReactTable } from '../../components';
 import { capitalizeWords } from '../../utils/utils.functions';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, getPaginationRowModel } from '@tanstack/react-table';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -67,6 +67,7 @@ export const TransactionsExplorer = () => {
 						<TanstackReactTable
 							data={txs ?? []}
 							columns={transactionsColumns}
+							options={{ getPaginationRowModel: getPaginationRowModel() }}
 						/>
 					</div>
 				</div>
