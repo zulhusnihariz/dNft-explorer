@@ -16,14 +16,15 @@ export const TSParticles = () => {
 		[]
 	);
 	return (
-		<div className="h-[360px]">
-			<h1 className="absolute inset-x-0 z-10 text-4xl text-white mt-10 mb-20 font-normal tracking-wide">
+		<>
+			<h1 className="absolute inset-x-0 z-10 text-4xl text-white mt-16 mb-20 font-normal tracking-wide">
 				Lineage Explorer
 			</h1>
 			<Particles
 				id="tsparticles"
 				init={particlesInit}
 				loaded={particlesLoaded}
+				style={{ height: '360px' }}
 				options={{
 					fullScreen: false,
 					fps_limit: 60,
@@ -60,6 +61,6 @@ export const TSParticles = () => {
 					detectRetina: true,
 				}}
 			/>
-		</div>
+		</>
 	);
 };

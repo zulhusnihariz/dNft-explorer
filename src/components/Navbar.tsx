@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import logo from '../assets/lineagelogo.png';
 import Dropdown from 'rc-dropdown';
 import '../assets/rc-dropdown.css';
@@ -31,17 +31,28 @@ const CustomNavLink = ({
 };
 
 const Navbar = () => {
-	// get the sticky element
+	const [stickyClass, setStickyClass] = useState('relative pt-8');
+
 	useEffect(() => {
-		const stickyElm = document.querySelector('header');
+		window.addEventListener('scroll', stickNavbar);
 
-		const observer = new IntersectionObserver(
-			([e]) => e.target.classList.toggle('isSticky', e.intersectionRatio < 1),
-			{ threshold: [1] }
-		);
+		return () => {
+			window.removeEventListener('scroll', stickNavbar);
+		};
+	}, []);
 
-		observer.observe(stickyElm as HTMLElement);
-	});
+	const stickNavbar = () => {
+		if (window !== undefined) {
+			let windowHeight = window.scrollY;
+
+			console.log(windowHeight);
+			windowHeight > 80
+				? setStickyClass(
+						'!fixed inset-x-0 z-50 bg-white duration-100 text-[#243c5a]'
+				  )
+				: setStickyClass('relative pt-8');
+		}
+	};
 
 	const menuItems = [
 		<MenuItem
@@ -56,8 +67,9 @@ const Navbar = () => {
 	];
 
 	return (
-		<header aria-label="SEED Header pt-2 h-20">
-			<div className=" mx-auto max-w-screen-xl flex h-20 items-center justify-between">
+		//
+		<header aria-label="SEED Header" className={`${stickyClass}`}>
+			<div className=" mx-auto w-full max-w-[70%] flex items-center justify-between">
 				<CustomNavLink className="block" to="/">
 					<img src={logo} alt="" width={350} height={41} className="" />
 				</CustomNavLink>

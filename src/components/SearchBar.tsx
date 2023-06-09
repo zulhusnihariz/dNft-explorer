@@ -49,33 +49,31 @@ export const SearchBar = () => {
 	};
 
 	return (
-		<section className="z-2">
-			<div className="flex items-center justify-center">
-				<div className="absolute flex rounded w-3/4 bg-white p-10 shadow-md items-center top-72">
-					<input
-						type="text"
-						className="w-full bg-white pl-2 border border-grey-500 rounded py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
-						placeholder="Token Address"
-						name="address"
-						value={search.address}
-						onChange={onHandleChange}
-					/>
-					<input
-						type="text"
-						className="w-1/2 bg-white pl-2 border border-1 rounded border-grey-500  py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
-						placeholder="Token ID"
-						name="tokenId"
-						value={search.tokenId}
-						onChange={onHandleChange}
-					/>
+		<section className="z-2 flex items-center justify-center pb-5 mx-5 md:mx-0 relative bottom-20">
+			<div className="absolute flex rounded w-full  bg-white p-10 sm:mx-4 shadow-md items-center ">
+				<input
+					type="text"
+					className="w-full bg-white pl-2 border border-grey-500 rounded py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
+					placeholder="Token Address"
+					name="address"
+					value={search.address}
+					onChange={onHandleChange}
+				/>
+				<input
+					type="text"
+					className="w-1/2 bg-white pl-2 border border-1 rounded border-grey-500  py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
+					placeholder="Token ID"
+					name="tokenId"
+					value={search.tokenId}
+					onChange={onHandleChange}
+				/>
 
-					<button
-						className="bg-[#747FEB] px-3 py-2 rounded text-white font-bold hover:bg-blue-800 transition-colors"
-						onClick={onSearchClick}
-					>
-						<FontAwesomeIcon icon={faSearch} />
-					</button>
-				</div>
+				<button
+					className="bg-[#747FEB] px-3 py-2 rounded text-white font-bold hover:bg-blue-800 transition-colors"
+					onClick={onSearchClick}
+				>
+					<FontAwesomeIcon icon={faSearch} />
+				</button>
 			</div>
 		</section>
 	);

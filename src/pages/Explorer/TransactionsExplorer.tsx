@@ -51,7 +51,7 @@ export const TransactionsExplorer = () => {
 
 	return (
 		<>
-			<section className="flex items-center justify-center p-5">
+			<section className="flex items-center justify-center pb-5 mx-5 md:mx-0">
 				<div className="w-full  relative block border border-gray-100 p-2 shadow-sm text-left">
 					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
 						<div className="text-sm text-gray-600">

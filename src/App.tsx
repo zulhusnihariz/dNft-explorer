@@ -6,9 +6,11 @@ import { TSParticles, NavbarLayout } from './components';
 function App() {
 	return (
 		<div className="App">
-			<NavbarLayout />
-			<TSParticles />
-			<div className="w-full max-w-[1400px] mx-auto px-auto h-screen flex flex-col justify-start ">
+			<div className="h-[440px]">
+				<NavbarLayout />
+				<TSParticles />
+			</div>
+			<div className="w-full md:max-w-[70%] mx-auto px-auto h-screen flex flex-col justify-start ">
 				<Routes>
 					<Route index element={<MainExplorer />} />
 					<Route
