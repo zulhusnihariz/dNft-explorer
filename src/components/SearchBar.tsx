@@ -50,11 +50,8 @@ export const SearchBar = () => {
 
 	return (
 		<section className="z-2">
-			<div className="flex w-screen items-center justify-center p-5">
-				<h1 className="z-50 text-4xl text-white mt-10 mb-20 font-normal tracking-wide">
-					Lineage Explorer
-				</h1>
-				<div className="absolute flex w-full rounded w-3/4 bg-white p-10 shadow-md items-center top-72">
+			<div className="flex items-center justify-center">
+				<div className="absolute flex rounded w-3/4 bg-white p-10 shadow-md items-center top-72">
 					<input
 						type="text"
 						className="w-full bg-white pl-2 border border-grey-500 rounded py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"

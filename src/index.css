@@ -66,6 +66,7 @@ header {
 	transition: 0.1s;
 	z-index: 50;
 	color: white;
+	height: 80px;
 }
 
 /* styles for when the header is in sticky mode */

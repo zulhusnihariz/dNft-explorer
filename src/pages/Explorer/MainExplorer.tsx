@@ -154,7 +154,7 @@ export const MainExplorer = () => {
 		<>
 			<SearchBar />
 
-			<section className="flex w-screen items-center justify-center p-5 pt-48">
+			<section className="flex items-center justify-center p-5 bottom-56">
 				<div className="w-full  relative block border border-gray-100 p-2 shadow-sm text-left">
 					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
 						<div className="text-sm text-gray-600">
@@ -174,7 +174,7 @@ export const MainExplorer = () => {
 				</div>
 			</section>
 
-			<section className="flex w-screen items-center justify-center p-5">
+			<section className="flex items-center justify-center p-5">
 				<div className="w-full  relative block border border-gray-100 p-2 shadow-sm text-left">
 					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
 						<div className="text-sm text-gray-600">
