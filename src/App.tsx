@@ -5,23 +5,20 @@ import {
 	TransactionDetails,
 	TransactionsExplorer,
 } from './pages';
-import { TSParticles, NavbarLayout } from './components';
+import { NavbarLayout } from './components';
 
 function App() {
 	return (
-		<div className="App">
-			<div className="h-[440px]">
-				<NavbarLayout />
-				<TSParticles />
-			</div>
-			<div className="w-full md:max-w-[70%] mx-auto px-auto h-screen flex flex-col justify-start ">
+		<div className="App h-screen h-full">
+			<NavbarLayout />
+			<div className="container mx-auto">
 				<Routes>
-					<Route index element={<MainExplorer />} />
+					<Route element={<MainExplorer />} path="search" />
 					<Route
 						path="/:address/:tokenId/:chainId"
 						element={<MainExplorer />}
 					/>
-					<Route path="/txs" element={<TransactionsExplorer />} />
+					<Route index path="/txs" element={<TransactionsExplorer />} />
 					<Route path="/tx/:hash" element={<TransactionDetails />} />
 				</Routes>
 			</div>

@@ -4,7 +4,8 @@ import Dropdown from 'rc-dropdown';
 import '../assets/rc-dropdown.css';
 import Menu, { MenuItem } from 'rc-menu';
 import { NavLink } from 'react-router-dom';
-import { ArrowIcon } from '../assets/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 const CustomNavLink = ({
 	children,
@@ -21,7 +22,7 @@ const CustomNavLink = ({
 			className={className}
 			style={({ isActive }) => {
 				return {
-					color: isActive ? '#0784c3' : '',
+					color: isActive ? '#0784c3' : '#fff',
 				};
 			}}
 		>
@@ -53,37 +54,20 @@ const Navbar = () => {
 		}
 	};
 
-	const menuItems = [
-		<MenuItem
-			key="txs"
-			className="border-t-4 border-[#6E7DD6] hover:bg-[#E9ECEF] py-1"
-			onClick={() => console.log('tx clicked')}
-		>
-			<CustomNavLink to="/txs" className="px-8 active:text-red">
-				Transactions
-			</CustomNavLink>
-		</MenuItem>,
-	];
-
 	return (
 		//
-		<header aria-label="SEED Header" className={`${stickyClass}`}>
-			<div className=" mx-auto w-full max-w-[70%] flex items-center justify-between">
+		<header aria-label="SEED Header" className="bg-black">
+			<div className="mx-auto w-full flex items-center justify-between">
 				<CustomNavLink className="block" to="/">
 					<img src={logo} alt="" width={350} height={41} className="" />
 				</CustomNavLink>
-				<div className="flex gap-4 font-semibold text-sm ">
-					<CustomNavLink className="p-1 " to="/">
-						HOME
+				<div className="flex gap-4 font-semibold">
+					<CustomNavLink className="p-1" to="/txs">
+						Transactions
 					</CustomNavLink>
-					<h4 className="p-1 cursor-pointer">
-						<Dropdown overlay={<Menu>{menuItems}</Menu>}>
-							<button className="flex">
-								NFTs <ArrowIcon />
-							</button>
-						</Dropdown>
-					</h4>
-					<h4 className="p-1 cursor-pointer">MIGRATE TO LINEAGE</h4>
+					<CustomNavLink className="p-1" to="/search">
+					<FontAwesomeIcon icon={faSearch} /> Search 
+					</CustomNavLink>
 				</div>
 			</div>
 		</header>

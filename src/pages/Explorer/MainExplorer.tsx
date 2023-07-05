@@ -13,25 +13,17 @@ import {
 } from '../../utils/utils.functions';
 
 import { useParams } from 'react-router-dom';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, defaultColumnSizing } from '@tanstack/react-table';
 import { SearchBar } from '../../components/SearchBar';
 import { useBoundStore } from '../../store';
 import { useRepositories } from '../../repositories';
 
 const MetadataContent = ({ data }: { data: Metadatas }) => {
-	const { alias } = data;
 	const { content } = data.metadata.metadata;
-	const contentString = String(content);
 	return (
-		<>
-			{alias === 'attributes' ? (
-				<NftAttributeTable attributes={content as NftAttribute[]} />
-			) : isUrl(contentString) ? (
-				<ExternalURL url={contentString} />
-			) : (
-				content
-			)}
-		</>
+		<span className="text-xs text-gray-600">
+			{JSON.stringify(content)}
+		</span>
 	);
 };
 
@@ -74,33 +66,37 @@ export const MainExplorer = () => {
 			{
 				accessorKey: 'public_key',
 				header: () => <span>Public Key</span>,
-				cell: ({ row }) => <span>{row.getValue('public_key')}</span>,
+				cell: ({ row }) => <span className="text-xs">{row.getValue('public_key')}</span>,
+				size: 100
 			},
 			{
 				accessorKey: 'alias',
 				header: () => <span>Alias</span>,
-				cell: ({ row }) => <span>{row.getValue('alias')}</span>,
+				cell: ({ row }) => {
+					return (
+						<span
+								className="bg-amber-100 text-indigo-700 text-black text-xs px-2 py-1 rounded w-20 overflow-hidden text-ellipsis"
+								>{row.getValue('alias')}</span>
+					)
+				},
+				size: 60,
 			},
 			{
 				accessorKey: 'content',
 				header: () => <span>Content</span>,
 				cell: ({ row }) => {
-					return <MetadataContent data={row.original} />;
-				},
-			},
-			{
-				accessorKey: 'cid',
-				header: () => <span>CID</span>,
-				cell: ({ row }) => {
 					return (
-						<span
-							className="cursor-pointer"
-							onClick={() => {
-								onClickCid(row.original);
-							}}
-						>
-							{row.getValue('cid')}
-						</span>
+						<>
+							<div className="mb-2">
+							<span
+								className="cursor-pointer bg-indigo-100 text-indigo-700 text-black text-xs font-medium px-2 py-1 rounded w-20 overflow-hidden text-ellipsis"
+								onClick={() => {
+									onClickCid(row.original);
+								}}
+							>{row.original.cid}</span>
+							</div>
+							<MetadataContent data={row.original} />
+						</>
 					);
 				},
 			},
@@ -152,45 +148,55 @@ export const MainExplorer = () => {
 
 	return (
 		<>
-			<SearchBar />
+			<div className="w-full flex justify-center bg-[#34568B]">
+				<SearchBar />
+			</div>
 
-			<section className="flex items-center justify-center pb-5 mx-5 md:mx-0">
-				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
-					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
-						<div className="text-sm text-gray-600">
-							Metadata for data key: <b>{hash.dataKey}</b>
-						</div>
-						<div className="text-sm text-gray-600">
-							Total {metadata?.length ?? 0} datasets
-						</div>
-					</div>
+			{metadata && (
+				<>
+					<section className="flex items-center justify-center pb-5 mx-5 md:mx-0">
+						<div className="w-full relative block p-2 shadow-sm text-left">
+							<div className="text-gray-600 py-5">
+								<span className="text-xl font-bold mr-2">NFT Key</span><span className="text-sm">{hash.dataKey}</span>
+							</div>
+							<div className="rounded-xl border border-gray-200 bg-white shadow-md">
+								<div className="text-sm text-gray-800 p-4 text-left">
+									Total {metadata?.length ?? 0} datasets
+								</div>
 
-					<div className="overflow-x overflow-x-scroll">
-						<TanstackReactTable
-							data={metadata ?? []}
-							columns={metadataColumns}
-						/>
-					</div>
-				</div>
-			</section>
+								<div className="overflow-x overflow-x-scroll">
+									<TanstackReactTable
+										data={metadata ?? []}
+										columns={metadataColumns}
+									/>
+								</div>
+							</div>
+						</div>
+					</section>
 
-			<section className="flex items-center justify-center pb-5 mx-5 md:mx-0">
-				<div className="w-full relative block border border-gray-100 p-2 shadow-sm text-left">
-					<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
-						<div className="text-sm text-gray-600">
-							<p>
-								History for alias: <b>{history.alias}</b>
-							</p>
-						</div>
-						<div className="text-sm text-gray-600">
-							Total {history.data.length} history
-						</div>
-					</div>
-					<div className="overflow-x overflow-x-scroll">
-						<TanstackReactTable data={history.data} columns={historyColumns} />
-					</div>
-				</div>
-			</section>
+					{history.data.length > 0 && (
+						<>
+							<section className="flex items-center justify-center pb-5 mx-5 md:mx-0">
+								<div className="w-full relative block p-2 shadow-sm text-left">
+									<div className="mt-1 mb-4 sm:items-center sm:justify-between text-left ">
+										<div className="text-sm text-gray-600">
+											<p>
+												History for alias: <b>{history.alias}</b>
+											</p>
+										</div>
+										<div className="text-sm text-gray-600">
+											Total {history.data.length} history
+										</div>
+									</div>
+									<div className="overflow-x overflow-x-scroll">
+										<TanstackReactTable data={history.data} columns={historyColumns} />
+									</div>
+								</div>
+							</section>
+						</>
+					)}
+				</>
+			)}
 		</>
 	);
 };

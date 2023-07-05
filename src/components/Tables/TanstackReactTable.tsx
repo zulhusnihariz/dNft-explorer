@@ -101,12 +101,15 @@ export const TanstackReactTable = <TData, TValue>({
 	});
 
 	return (
-		<table className="min-w-full table-auto text-left text-sm text-gray-900 whitespace-nowrap">
+		<table className="border-none table-fixed w-full text-left text-sm text-gray-900 whitespace-nowrap">
 			<thead>
 				{table.getHeaderGroups().map((headerGroup) => (
 					<tr key={headerGroup.id}>
 						{headerGroup.headers.map((header) => (
-							<th key={header.id} className="p-2">
+							<th
+								key={header.id}
+								className="p-2"
+								style={{ width: header.getSize() }}>
 								{header.isPlaceholder
 									? null
 									: flexRender(

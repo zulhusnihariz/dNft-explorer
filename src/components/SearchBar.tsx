@@ -49,11 +49,12 @@ export const SearchBar = () => {
 	};
 
 	return (
-		<section className="z-2 flex items-center justify-center pb-5 mx-5 md:mx-0 relative bottom-20">
-			<div className="absolute flex rounded w-full  bg-white p-10 sm:mx-4 shadow-md items-center ">
+		<section className="w-3/4 p-5">
+			<h1 className="text-xl text-left font-semibold mb-3 text-white">The Lineage Metadata Explorer</h1>
+			<div className="flex rounded w-full items-center">
 				<input
 					type="text"
-					className="w-full bg-white pl-2 border border-grey-500 rounded py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
+					className="w-full bg-white pl-2 border border-blue-500 rounded-lg py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
 					placeholder="Token Address"
 					name="address"
 					value={search.address}
@@ -61,7 +62,7 @@ export const SearchBar = () => {
 				/>
 				<input
 					type="text"
-					className="w-1/2 bg-white pl-2 border border-1 rounded border-grey-500  py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
+					className="w-1/2 bg-white pl-2 border border-1 rounded-lg border-blue-500  py-3 mr-2 focus:border-[#747FEB] transition-all duration-300 focus:pl-4"
 					placeholder="Token ID"
 					name="tokenId"
 					value={search.tokenId}
